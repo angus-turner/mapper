@@ -1,0 +1,118 @@
+Yes, you can check for mandatory fields in JSON using JSONata expressions. By creating an expression that verifies the existence of specific fields, you can simulate the validation of required properties in your JSON structure. Here’s how to do it:
+
+### Example Scenario
+
+Let’s say you have a JSON structure representing a user profile:
+
+```json
+{
+  "user": {
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john.doe@example.com",
+    "age": 25
+  }
+}
+```
+
+### Mandatory Fields
+
+Assume the following fields are mandatory:
+- `firstName`
+- `lastName`
+- `email`
+
+### JSONata Expression to Check Mandatory Fields
+
+You can write a JSONata expression that checks for the existence of these fields and returns a validation result. Here’s an example expression:
+
+```jsonata
+{
+  "isValid": $and(
+    $exists(user.firstName) and $type(user.firstName) = "string",
+    $exists(user.lastName) and $type(user.lastName) = "string",
+    $exists(user.email) and $type(user.email) = "string"
+  ),
+  "missingFields": [
+    $not($exists(user.firstName)) ? "firstName" : null,
+    $not($exists(user.lastName)) ? "lastName" : null,
+    $not($exists(user.email)) ? "email" : null
+  ][ $not(=) ]  // Filter out null values
+}
+```
+
+### Breakdown of the Expression
+
+1. **`isValid` Field**: 
+   - The `isValid` key uses the `$and()` function to ensure all mandatory fields exist and are of type string.
+   - It checks each field using `$exists(field)` and `$type(field)`.
+
+2. **`missingFields` Field**:
+   - This part constructs an array of missing fields.
+   - For each mandatory field, it checks if it exists. If it doesn’t, the field name is added to the array.
+   - The last part (`[ $not(=) ]`) filters out `null` values, leaving only the names of the missing fields.
+
+### Example Result
+
+For valid input, the result would be:
+
+```json
+{
+  "isValid": true,
+  "missingFields": []
+}
+```
+
+For input where `firstName` is missing:
+
+```json
+{
+  "isValid": false,
+  "missingFields": ["firstName"]
+}
+```
+
+### Java Example Using Dashjoin JSONata
+
+If you want to implement this in Java using the Dashjoin JSONata library, here’s how you can do it:
+
+```java
+import com.api.jsonata4java.Expression;
+import com.api.jsonata4java.expressions.utils.JsonUtils;
+import com.fasterxml.jackson.databind.JsonNode;
+
+public class MandatoryFieldsCheck {
+
+    public static void main(String[] args) throws Exception {
+        String jsonInput = "{ \"user\": { \"lastName\": \"Doe\", \"email\": \"john.doe@example.com\", \"age\": 25 } }";
+        
+        // Parse the input JSON
+        JsonNode inputNode = JsonUtils.jsonToNode(jsonInput);
+        
+        // JSONata expression to check for mandatory fields
+        String validationExpression = "{ " +
+            "\"isValid\": $and(" +
+            "  $exists(user.firstName) and $type(user.firstName) = 'string', " +
+            "  $exists(user.lastName) and $type(user.lastName) = 'string', " +
+            "  $exists(user.email) and $type(user.email) = 'string'" +
+            "), " +
+            "\"missingFields\": [" +
+            "  $not($exists(user.firstName)) ? 'firstName' : null, " +
+            "  $not($exists(user.lastName)) ? 'lastName' : null, " +
+            "  $not($exists(user.email)) ? 'email' : null " +
+            "][ $not(=) ]" +
+            "}";
+        
+        // Compile and evaluate the expression
+        Expression jsonataExpr = Expression.jsonata(validationExpression);
+        JsonNode resultNode = jsonataExpr.evaluate(inputNode);
+        
+        // Output the validation result
+        System.out.println(JsonUtils.toJsonString(resultNode));
+    }
+}
+```
+
+### Summary
+
+Using JSONata, you can effectively check for mandatory fields by verifying the existence and type of those fields. This allows you to simulate validation processes, ensuring your JSON structure meets your requirements. If you need more specific examples or help with implementation, feel free to ask!
