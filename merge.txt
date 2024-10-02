@@ -1,0 +1,61 @@
+const jsonata = require('jsonata');
+
+// First JSON object
+const json1 = {
+  "customers": [
+    {
+      "id": 1,
+      "fullName": "John Doe",
+      "age": 29,
+      "address": {
+        "street": "123 Main St",
+        "city": "Somewhere"
+      }
+    },
+    {
+      "id": 2,
+      "fullName": "Jane Smith",
+      "age": 34,
+      "address": {
+        "street": "456 Oak St",
+        "city": "Anywhere"
+      }
+    }
+  ]
+};
+
+// Second JSON object
+const json2 = {
+  "customers": [
+    {
+      "id": 1,
+      "email": "john.doe@example.com",
+      "phone": "555-1234"
+    },
+    {
+      "id": 2,
+      "email": "jane.smith@example.com",
+      "phone": "555-5678"
+    }
+  ]
+};
+
+// JSONata merge expression
+const mergeExpression = `
+$map(customers, function($v) {
+  $merge([
+    $filter($.customers1, function($cust) { $cust.id = $v.id }),
+    $v
+  ])
+})
+`;
+
+// Create a combined input object with both JSON objects
+const inputJson = { customers1: json1.customers, customers2: json2.customers };
+
+// Compile and evaluate the JSONata expression
+const expression = jsonata(mergeExpression);
+const result = expression.evaluate(inputJson);
+
+// Output the merged JSON
+console.log(JSON.stringify(result, null, 2));
