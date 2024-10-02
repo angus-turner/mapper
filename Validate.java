@@ -37,3 +37,24 @@ public class JsonValidationExample {
         System.out.println(JsonUtils.toJsonString(resultNode));
     }
 }
+/*
+
+$map(customers, function($v, $i, $a) {
+  {
+    "isValid": $and(
+      $exists($v.fullName) and $type($v.fullName) = "string",
+      $exists($v.age) and $type($v.age) = "number" and $v.age > 18,
+      $exists($v.address.city),
+      $exists($v.address.street)
+    ),
+    "errorMessage": 
+      !$exists($v.fullName) ? "Full name is missing for customer at index " & $i :
+      !$exists($v.age) ? "Age is missing for customer at index " & $i :
+      $type($v.age) != "number" ? "Age must be a number for customer at index " & $i :
+      $v.age <= 18 ? "Age must be greater than 18 for customer at index " & $i :
+      !$exists($v.address.city) ? "City is missing for customer at index " & $i :
+      !$exists($v.address.street) ? "Street is missing for customer at index " & $i :
+      null
+  }
+})
+*/
