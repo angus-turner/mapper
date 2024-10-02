@@ -57,4 +57,12 @@ $map(customers, function($v, $i, $a) {
       null
   }
 })
+
+
+$map(customers, function($v) {
+  {
+    "fullName": $v.fullName,
+    "city": $v.address.city
+  }
+})
 */
