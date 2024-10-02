@@ -59,3 +59,42 @@ const result = expression.evaluate(inputJson);
 
 // Output the merged JSON
 console.log(JSON.stringify(result, null, 2));
+
+
+/////
+import com.api.jsonata4java.Expression;
+import com.api.jsonata4java.expressions.Expressions;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+public class JsonataMapExample {
+
+    public static void main(String[] args) throws Exception {
+        // First JSON object (as String)
+        String json1 = "{ \"customers\": [ { \"id\": 1, \"fullName\": \"John Doe\", \"age\": 29, \"address\": { \"street\": \"123 Main St\", \"city\": \"Somewhere\" } } ] }";
+        
+        // Second JSON object (as String)
+        String json2 = "{ \"customers\": [ { \"id\": 2, \"fullName\": \"Jane Smith\", \"age\": 34, \"address\": { \"street\": \"456 Maple St\", \"city\": \"Anywhere\" } } ] }";
+
+        // JSONata expression to map and merge two customer arrays
+        String mergeExpression = "$map($append($.customers, $other.customers), function($v) { { \"id\": $v.id, \"fullName\": $v.fullName, \"age\": $v.age, \"address\": $v.address } })";
+
+        // Use Jackson's ObjectMapper to parse the JSON
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode inputJson1 = objectMapper.readTree(json1);
+        JsonNode inputJson2 = objectMapper.readTree(json2);
+
+        // Parse the JSONata expression
+        Expression expression = Expressions.parse(mergeExpression);
+
+        // Assign the second JSON as the 'other' context variable
+        expression.assign("other", inputJson2);
+
+        // Evaluate the expression using the first JSON as input
+        JsonNode result = expression.evaluate(inputJson1);
+
+        // Output the merged JSON result
+        System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
+    }
+}
+
